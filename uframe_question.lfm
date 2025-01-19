@@ -105,6 +105,7 @@ object Frame1: TFrame1
           Align = alClient
           Anchors = [akLeft, akRight, akBottom]
           Font.Color = 16119285
+          Font.Height = -13
           ParentFont = False
           ScrollBars = ssAutoVertical
           TabOrder = 0
@@ -136,9 +137,7 @@ object Frame1: TFrame1
           Width = 328
           Align = alClient
           Font.Color = 16119285
-          Lines.Strings = (
-            'mmoAnswer'
-          )
+          Font.Height = -13
           ParentFont = False
           ScrollBars = ssAutoBoth
           TabOrder = 0
@@ -184,6 +183,24 @@ object Frame1: TFrame1
         Anchors = [akTop, akRight]
         Caption = 'Auto copy to clipboard'
         TabOrder = 1
+      end
+      object btnZoomMinus: TButton
+        Left = 99
+        Height = 17
+        Top = 4
+        Width = 23
+        Caption = '-'
+        TabOrder = 2
+        OnClick = btnZoomMinusClick
+      end
+      object btnZoomPlus: TButton
+        Left = 128
+        Height = 17
+        Top = 4
+        Width = 23
+        Caption = '+'
+        TabOrder = 3
+        OnClick = btnZoomPlusClick
       end
     end
   end

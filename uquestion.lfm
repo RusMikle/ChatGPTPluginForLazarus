@@ -8,7 +8,6 @@ object Frm_Question: TFrm_Question
   ClientWidth = 327
   KeyPreview = True
   Position = poScreenCenter
-  LCLVersion = '3.6.0.0'
   inline Frame1_1: TFrame1
     Height = 429
     Width = 327
@@ -47,9 +46,6 @@ object Frm_Question: TFrm_Question
           inherited mmoAnswer: TMemo
             Height = 225
             Width = 321
-            Lines.Strings = (
-              'mmoAnswer'
-            )
           end
         end
         inherited Splitter1: TSplitter

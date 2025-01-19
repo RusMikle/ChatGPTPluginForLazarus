@@ -14,6 +14,8 @@ type
   TFrame1 = class(TFrame)
     btnAsk: TButton;
     btnClipBoard: TButton;
+    btnZoomMinus: TButton;
+    btnZoomPlus: TButton;
     chkAutoCopy: TCheckBox;
     Label1: TLabel;
     Label2: TLabel;
@@ -35,6 +37,8 @@ type
     procedure btnAskClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
     procedure btnClipBoardClick(Sender: TObject);
+    procedure btnZoomMinusClick(Sender: TObject);
+    procedure btnZoomPlusClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
@@ -90,6 +94,18 @@ end;
 procedure TFrame1.btnClipBoardClick(Sender: TObject);
 begin
   Clipboard.SetTextBuf(PChar(mmoAnswer.Lines.Text));
+end;
+
+procedure TFrame1.btnZoomMinusClick(Sender: TObject);
+begin
+  mmoQuestion.Font.Size := mmoQuestion.Font.Size -2;
+  mmoAnswer.Font.Size := mmoAnswer.Font.Size -2;
+end;
+
+procedure TFrame1.btnZoomPlusClick(Sender: TObject);
+begin
+  mmoQuestion.Font.Size := mmoQuestion.Font.Size +2;
+  mmoAnswer.Font.Size := mmoAnswer.Font.Size +2;
 end;
 
 procedure TFrame1.MenuItem1Click(Sender: TObject);

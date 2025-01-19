@@ -65,6 +65,26 @@ var
   LvResponseStream: TMemoryStream;
   LvResponseContent: TStringStream;
   LvResponseJSON: TJSONObject;
+
+  function _JsonEscape(const S: string): string;
+  var
+    i: Integer;
+  begin
+    // Deutschsprachige Kommentare:
+    // Hier ersetzen wir Sonderzeichen, z.B. Anführungszeichen und Backslash.
+    Result := '';
+    for i := 1 to Length(S) do
+      case S[i] of
+        '"':  Result += '\"';
+        '\':  Result += '\\';
+        #8:   Result += '\b';   // Backspace
+        #9:   Result += '\t';   // Tab
+        #10:  Result += '\n';   // NewLine (LF)
+        #13:  Result += '\r';   // Carriage Return (CR)
+        #12:  Result += '\f';   // Form Feed
+        else  Result += S[i];
+      end;
+  end;
 begin
   Result := '';
   LvHttpClient := TFPHTTPClient.Create(nil);
@@ -78,7 +98,7 @@ begin
 
     LvResponseStream := TMemoryStream.Create;
     try
-     LvHttpClient.RequestBody := TStringStream.Create('{"model": "' + AModel + '", "messages": [{"role": "user", "content": "' + APrompt + '"}]}');
+     LvHttpClient.RequestBody := TStringStream.Create('{"model": "' + AModel + '", "messages": [{"role": "user", "content": "' + _JsonEscape (APrompt) + '"}]}');
 
         try
           try
@@ -183,13 +203,6 @@ begin
       if (FAnimated) and (LvResult.Length > 1) then
       begin
         _AnimateUtf8 (LvResult);
-        {for I := 0 to Pred(LvResult.Length) do
-        begin
-          Sleep(1);
-          FAnswer := LvResult[I];
-          FDone := (I = Pred(LvResult.Length));
-          Synchronize(@DoSync);
-        end;}
       end
       else
       begin
