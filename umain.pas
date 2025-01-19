@@ -58,7 +58,7 @@ begin
       LvSettingFrm.edt_ApiKey.Text := ApiKey;
       LvSettingFrm.cbbModel.Text := Model;
       LvSettingFrm.edt_MaxToken.Text := IntToStr(MaxToken);
-      LvSettingFrm.edt_Temperature.Text := IntToStr(Temperature);
+      LvSettingFrm.edt_Temperature.Text := Temperature;
       LvSettingFrm.edtTimeout.Text := IntToStr(TimeOut);
       LvSettingFrm.chk_AnimatedLetters.Checked := AnimatedLetters;
     end;

@@ -5,11 +5,11 @@ unit UConsts;
 interface
 
 const
-  DefaultChatGPTURL = 'https://api.openai.com/v1/completions';
-  DefaultChatGPT3_5TurboURL = 'https://api.openai.com/v1/chat/completions';
-  DefaultModel = 'text-davinci-003';
+  DefaultChatGPTURL = 'https://api.openai.com/v1/chat/completions';
+  DefaultChatGPT4 = 'https://api.openai.com/v1/chat/completions';
+  DefaultModel = 'gpt-4';
   DefaultMaxToken = 2048;
-  DefaultTemperature = 0;
+  DefaultTemperature = '0,1';
   DefaultIdentifier = 'cpt';
   DefaultCodeFormatter = False;
   DefaultRTL = False;

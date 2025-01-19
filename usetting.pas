@@ -9,11 +9,10 @@ uses
   fgl, UConsts, fpjson, IniFiles;
 
 const
-  DefaultChatGPTURL = 'https://api.openai.com/v1/completions';
-  DefaultChatGPT3_5TurboURL = 'https://api.openai.com/v1/chat/completions';
-  DefaultModel = 'text-davinci-003';
+  DefaultChatGPTURL = 'https://api.openai.com/v1/chat/completions';
+  DefaultModel = 'gpt-4';
   DefaultMaxToken = 2048;
-  DefaultTemperature = 0;
+  DefaultTemperature = '0,1';
 
 type
   { TSingletonSettingObj }
@@ -24,7 +23,7 @@ type
     FURL: string;
     FModel: string;
     FMaxToken: Integer;
-    FTemperature: Integer;
+    FTemperature: string;
     FIdentifier: string;
     FCodeFormatter: Boolean;
 
@@ -58,7 +57,7 @@ type
     property URL: string read FURL write FURL;
     property Model: string read FModel write FModel;
     property MaxToken: Integer read FMaxToken write FMaxToken;
-    property Temperature: Integer read FTemperature write FTemperature;
+    property Temperature: string read FTemperature write FTemperature;
     property CodeFormatter: Boolean read FCodeFormatter write FCodeFormatter;
     property Identifier: string read FIdentifier write FIdentifier;
     property HistoryEnabled: Boolean read FHistoryEnabled write FHistoryEnabled;
@@ -97,7 +96,6 @@ type
     pnlOpenAI: TPanel;
     procedure Btn_DefaultClick(Sender: TObject);
     procedure Btn_SaveClick(Sender: TObject);
-    procedure cbbModelChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
@@ -129,36 +127,13 @@ begin
     URL := edt_Url.Text;
     Model := cbbModel.Text;
     MaxToken := StrToInt(edt_MaxToken.Text);
-    Temperature := StrToInt(edt_Temperature.Text);
+    Temperature := edt_Temperature.Text;
     AnimatedLetters := chk_AnimatedLetters.Checked;
     TimeOut := StrToInt(edtTimeout.Text);
     LastQuestion := 'Create a class to make a Zip file in Delphi.';
     WriteConfig;
   end;
   Close;
-end;
-
-procedure TFrm_Setting.cbbModelChange(Sender: TObject);
-begin
-  if (cbbModel.ItemIndex in [4, 5]) and (edt_Url.Text = DefaultChatGPTURL) then
-  begin
-    if MessageDlg('gpt-3.5-turbo uses a different base URL, would you like me to set it automatically?' + #13 +
-                    'The base URL should be something like the following URL but in case it doesn''t work ' + #13 +
-                    'Please visit the online documentation from OpenAI in this regard' + #13 +
-                    'Base URL: https://api.openai.com/v1/chat/completions',
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-      edt_Url.Text := DefaultChatGPT3_5TurboURL;
-  end;
-
-  if not(cbbModel.ItemIndex in [4, 5]) and (edt_Url.Text = DefaultChatGPT3_5TurboURL) then
-  begin
-    if MessageDlg('Any model except "gpt-3.5-turbo" uses a different base URL, would you like me to set it automatically?' + #13 +
-                'The base URL should be something like the following URL but in case it doesn''t work ' + #13 +
-                'Please visit the online documentation from OpenAI in this regard' + #13 +
-                'Base URL: https://api.openai.com/v1/completions',
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-      edt_Url.Text := DefaultChatGPTURL;
-  end;
 end;
 
 procedure TFrm_Setting.FormCreate(Sender: TObject);
@@ -187,9 +162,9 @@ begin
   edt_Url.Text := DefaultChatGPTURL;
   cbbModel.Text := DefaultModel;
   edt_MaxToken.Text := IntToStr(DefaultMaxToken);
-  edt_Temperature.Text := IntToStr(DefaultTemperature);
+  edt_Temperature.Text := DefaultTemperature;
   chk_AnimatedLetters.Checked := True;
-  edtTimeout.Text := '20';
+  edtTimeout.Text := '40';
 end;
 
 { TSingletonSettingObj }
@@ -240,7 +215,7 @@ begin
     FApiKey := LvIniFile.ReadString('ChatGPT', 'APIKey', '');
     FModel := LvIniFile.ReadString('ChatGPT', 'Model', DefaultModel);
     FMaxToken := LvIniFile.ReadInteger('ChatGPT', 'MaxToken', DefaultMaxToken);
-    FTemperature := LvIniFile.ReadInteger('ChatGPT', 'Temperature', DefaultTemperature);
+    FTemperature := LvIniFile.ReadString('ChatGPT', 'Temperature', DefaultTemperature);
     FAnimatedLetters := LvIniFile.ReadBool('ChatGPT', 'AnimatedLetters', True);
     FTimeOut := LvIniFile.ReadInteger('ChatGPT', 'TimeOut', 20);
     FLastQuestion := LvIniFile.ReadString('ChatGPT', 'LastQuestion', 'Create a class in Lazarus to manage reading and writing XML files');
@@ -259,7 +234,7 @@ begin
     LvIniFile.WriteString('ChatGPT', 'APIKey', FApiKey);
     LvIniFile.WriteString('ChatGPT', 'Model', FModel);
     LvIniFile.WriteInteger('ChatGPT', 'MaxToken', FMaxToken);
-    LvIniFile.WriteInteger('ChatGPT', 'Temperature', FTemperature);
+    LvIniFile.WriteString('ChatGPT', 'Temperature', FTemperature);
     LvIniFile.WriteBool('ChatGPT', 'AnimatedLetters', FAnimatedLetters);
     LvIniFile.WriteInteger('ChatGPT', 'TimeOut', FTimeOut);
   finally

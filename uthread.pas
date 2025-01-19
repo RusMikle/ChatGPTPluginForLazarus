@@ -5,7 +5,7 @@ unit UThread;
 interface
 
 uses
-  Classes, SysUtils, StdCtrls, USetting, fphttpclient, fpjson, Dialogs;
+  Classes, SysUtils, StdCtrls, USetting, fphttpclient, fpjson, Dialogs, LazUtf8;
 
 type
 
@@ -18,8 +18,7 @@ type
     FDone: Boolean;
     FOnShowAnswer: TShowAnswerEvent;
     FPrompt: string;
-    FMaxToken: Integer;
-    FTemperature: Integer;
+    FTemperature: string;
     FModel: string;
     FApiKey: string;
     FUrl: string;
@@ -31,7 +30,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(AApiKey, AModel, APrompt, AUrl: string; AMaxToken, ATemperature: Integer; AAnimated: Boolean; ATimeOut: Integer);
+    constructor Create(AApiKey, AModel, APrompt, AUrl: string; ATemperature: string; AAnimated: Boolean; ATimeOut: Integer);
     destructor Destroy; override;
     property OnShowAnswer: TShowAnswerEvent read FOnShowAnswer write FOnShowAnswer;
   end;
@@ -43,20 +42,14 @@ type
     FAccessToken: string;
     FUrl: string;
     FTimeOut: Integer;
-    function Is3_5Turbo(AModel: string): Boolean;
   public
     constructor Create(const AAccessToken, AUrl: string; ATimeOut: Integer);
-    function Query(const AModel: string; const APrompt: string; AMaxToken: Integer; ATemperature: Integer): string;
+    function Query(const AModel: string; const APrompt: string; ATemperature: string): string;
   end;
 
 implementation
 
 { TOpenAIAPI }
-
-function TOpenAIAPI.Is3_5Turbo(AModel: string): Boolean;
-begin
-  Result := AModel.Contains('gpt-3.5-turbo');
-end;
 
 constructor TOpenAIAPI.Create(const AAccessToken, AUrl: string; ATimeOut: Integer);
 begin
@@ -66,7 +59,7 @@ begin
   FTimeOut := ATimeOut;
 end;
 
-function TOpenAIAPI.Query(const AModel: string; const APrompt: string; AMaxToken: Integer; ATemperature: Integer): string;
+function TOpenAIAPI.Query(const AModel: string; const APrompt: string; ATemperature: string): string;
 var
   LvHttpClient: TFPHTTPClient;
   LvResponseStream: TMemoryStream;
@@ -80,17 +73,13 @@ begin
 
   try
     LvHttpClient.RequestHeaders.Add('Authorization: Bearer ' + FAccessToken);
-    LvHttpClient.AddHeader('Content-Type', 'application/json');
+    LvHttpClient.AddHeader('Content-Type', 'application/json; charset=UTF-8');
     LvHttpClient.AddHeader('AcceptEncoding', 'deflate, gzip;q=1.0, *;q=0.5');
 
     LvResponseStream := TMemoryStream.Create;
     try
-      if Is3_5Turbo(AModel) then
-        LvHttpClient.RequestBody := TStringStream.Create('{"model": "' + AModel + '", "messages": [{"role": "user", "content": "' + APrompt + '"}]}')
-      else
-        LvHttpClient.RequestBody := TStringStream.Create('{"prompt": "' + APrompt + '", "max_tokens": ' + IntToStr(AMaxToken)
-                                                       + ', "model": "' + AModel
-                                                       + '", "temperature": ' + IntToStr(ATemperature) + '}');
+     LvHttpClient.RequestBody := TStringStream.Create('{"model": "' + AModel + '", "messages": [{"role": "user", "content": "' + APrompt + '"}]}');
+
         try
           try
             LvHttpClient.Post(FUrl, LvResponseStream);
@@ -100,24 +89,14 @@ begin
             LvResponseJSON := GetJSON(LvResponseContent.DataString) as TJSONObject;
             if Assigned(LvResponseJSON) then
             begin
-              if Is3_5Turbo(AModel) then
-              begin
-                if LvResponseJSON.Find('choices') <> nil then
-                   Result := UTF8Encode((LvResponseJSON.Find('choices') as TJSONArray).Items[0].FindPath('message').FindPath('content').AsString)
-                else if LvResponseJSON.Find('error') <> nil then
-                  Result := UTF8Encode(LvResponseJSON.Find('error').FindPath('message').AsString)
-                else
-                  Result := 'No valid Answer, try again please.';
-              end
+              if LvResponseJSON.Find('choices') <> nil then
+                 //Result := UTF8encode((LvResponseJSON.Find('choices') as TJSONArray).Items[0].FindPath('message').FindPath('content').AsString)
+                 Result := (LvResponseJSON.Find('choices') as TJSONArray).Items[0].FindPath('message').FindPath('content').AsString
+              else if LvResponseJSON.Find('error') <> nil then
+                //Result := UTF8encode(LvResponseJSON.Find('error').FindPath('message').AsString)
+                Result := LvResponseJSON.Find('error').FindPath('message').AsString
               else
-              begin
-                if LvResponseJSON.Find('choices') <> nil then
-                  Result := UTF8Encode((LvResponseJSON.Find('choices') as TJSONArray).Items[0].FindPath('text').AsString)
-                else if LvResponseJSON.Find('error') <> nil then
-                  Result := UTF8Encode(LvResponseJSON.Find('error').FindPath('message').AsString)
-                else
-                  Result := 'No valid Answer, try again please.';
-              end;
+                Result := 'No valid Answer, try again please.';
             end
             else
               Result := 'No valid Answer, try again please.';
@@ -164,23 +143,53 @@ procedure TExecutorTrd.Execute;
 var
   LvAPI: TOpenAIAPI;
   LvResult: String;
-  I: Integer;
+  //I: Integer;
+
+  procedure _AnimateUtf8(const AText: String);
+  var
+    i, Len: integer;
+    CharLen: integer;
+    Symbol: String;
+    Temp: String;
+  begin
+    Temp := '';
+    i := 1;
+    Len := UTF8Length(AText);  // Количество Unicode-символов
+
+    while i <= Length(AText) do
+    begin
+      Sleep(1);
+      // UTF8Copy(AText, StartCharIndex, SymbolCount)
+      // Также есть UTF8CodepointSize(), UTF8CharacterToWideChar(), и т.д.
+      CharLen := UTF8CharacterLength(@AText[i]);
+      Symbol := Copy(AText, i, CharLen);
+      i += CharLen;
+
+      //Temp += Symbol;
+
+      FAnswer := Symbol;
+      FDone := i > Length(AText);
+      Synchronize(@DoSync);
+    end;
+  end;
+
 begin
   try
     LvAPI := TOpenAIAPI.Create(FApiKey, FUrl, FTimeOut);
     try
       if not Terminated then
-        LvResult := LvAPI.Query(FModel, FPrompt, FMaxToken, FTemperature).Trim;
+        LvResult := LvAPI.Query(FModel, FPrompt, FTemperature).Trim;
 
       if (FAnimated) and (LvResult.Length > 1) then
       begin
-        for I := 0 to Pred(LvResult.Length) do
+        _AnimateUtf8 (LvResult);
+        {for I := 0 to Pred(LvResult.Length) do
         begin
           Sleep(1);
           FAnswer := LvResult[I];
           FDone := (I = Pred(LvResult.Length));
           Synchronize(@DoSync);
-        end;
+        end;}
       end
       else
       begin
@@ -201,7 +210,7 @@ begin
   end;
 end;
 
-constructor TExecutorTrd.Create(AApiKey, AModel, APrompt, AUrl: string; AMaxToken, ATemperature: Integer; AAnimated: Boolean; ATimeOut: Integer);
+constructor TExecutorTrd.Create(AApiKey, AModel, APrompt, AUrl: string; ATemperature: string; AAnimated: Boolean; ATimeOut: Integer);
 begin
   inherited Create(True);
   FreeOnTerminate := True;
@@ -209,7 +218,6 @@ begin
   FApiKey := AApiKey;
   FModel := AModel;
   FPrompt := CorrectPrompt(APrompt);
-  FMaxToken := AMaxToken;
   FTemperature := ATemperature;
   FUrl := AUrl;
   FAnimated := AAnimated;

@@ -17,11 +17,11 @@ type
     chkAutoCopy: TCheckBox;
     Label1: TLabel;
     Label2: TLabel;
+    mmoAnswer: TMemo;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     mmoQuestion: TMemo;
-    mmoAnswer: TMemo;
     pnlQuestion: TPanel;
     pnlAnswer: TPanel;
     pnlBottom: TPanel;
@@ -138,7 +138,7 @@ var
   LvSetting: TSingletonSettingObj;
 begin
   LvSetting := TSingletonSettingObj.Instance;
-  LvChatGPTTrd := TExecutorTrd.Create(LvSetting.ApiKey, LvSetting.Model, AQuestion, LvSetting.URL, LvSetting.MaxToken,
+  LvChatGPTTrd := TExecutorTrd.Create(LvSetting.ApiKey, LvSetting.Model, AQuestion, LvSetting.URL,
                                       LvSetting.Temperature, LvSetting.AnimatedLetters, LvSetting.TimeOut);
   LvChatGPTTrd.OnShowAnswer := @ShowAnswer;
   LvChatGPTTrd.Start;

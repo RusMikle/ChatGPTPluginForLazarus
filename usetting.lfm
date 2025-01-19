@@ -11,7 +11,7 @@ object Frm_Setting: TFrm_Setting
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.6.0.0'
   object pnlBottom: TPanel
     Left = 0
     Height = 43
@@ -29,8 +29,8 @@ object Frm_Setting: TFrm_Setting
       Width = 89
       Anchors = [akRight, akBottom]
       Caption = 'Load Defaults'
-      OnClick = Btn_DefaultClick
       TabOrder = 0
+      OnClick = Btn_DefaultClick
     end
     object Btn_Save: TButton
       Left = 372
@@ -39,8 +39,8 @@ object Frm_Setting: TFrm_Setting
       Width = 89
       Anchors = [akRight, akBottom]
       Caption = 'Save && Close'
-      OnClick = Btn_SaveClick
       TabOrder = 1
+      OnClick = Btn_SaveClick
     end
   end
   object pnlMain: TPanel
@@ -108,7 +108,7 @@ object Frm_Setting: TFrm_Setting
           Left = 12
           Height = 15
           Top = 135
-          Width = 69
+          Width = 70
           Caption = 'Temperature:'
           ParentColor = False
         end
@@ -118,7 +118,7 @@ object Frm_Setting: TFrm_Setting
           Top = 12
           Width = 318
           TabOrder = 0
-          Text = 'https://api.openai.com/v1/completions'
+          Text = 'https://api.openai.com/v1/chat/completions'
         end
         object edt_ApiKey: TEdit
           Left = 89
@@ -143,7 +143,6 @@ object Frm_Setting: TFrm_Setting
           Height = 23
           Top = 131
           Width = 122
-          NumbersOnly = True
           TabOrder = 3
           Text = '0'
         end
@@ -153,30 +152,17 @@ object Frm_Setting: TFrm_Setting
           Top = 72
           Width = 122
           ItemHeight = 15
-          ItemIndex = 0
           Items.Strings = (
-            'text-davinci-003'
-            'text-curie-001'
-            'text-babbage-001'
-            'text-ada-001'
-            'gpt-3.5-turbo'
-            'gpt-3.5-turbo-0301'
-            'code-davinci-002'
-            'text-davinci-002'
             'gpt-4'
-            'gpt-4-32k'
-            'gpt-4-0314'
           )
-          OnChange = cbbModelChange
           Style = csDropDownList
           TabOrder = 4
-          Text = 'text-davinci-003'
         end
         object chk_AnimatedLetters: TCheckBox
           Left = 234
           Height = 19
           Top = 76
-          Width = 110
+          Width = 108
           Caption = 'Animated Letters'
           Color = clBtnFace
           ParentColor = False
@@ -189,7 +175,7 @@ object Frm_Setting: TFrm_Setting
           Width = 28
           Alignment = taCenter
           EditLabel.Height = 15
-          EditLabel.Width = 57
+          EditLabel.Width = 58
           EditLabel.Caption = 'Timeout(s)'
           EditLabel.ParentColor = False
           LabelPosition = lpLeft
